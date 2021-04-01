@@ -4,9 +4,6 @@
 Project built with go1.16, using native go libraries.
 
 ## Getting started
-***
-
-Test
 
 ### Prerequisites
 
@@ -29,7 +26,6 @@ go build
 ```
 
 ## Usage
-***
 
 Start the broker, inject consumer and publisher ports via environment variables
 ```bash
