@@ -3,7 +3,6 @@ package broker
 import (
 	"github.com/andriusbil/tcp-broker/logger"
 	"io"
-	"log"
 	"net"
 )
 
@@ -24,7 +23,7 @@ func NewPublisherServer(port string, log logger.Logger) *PublisherServer {
 	}
 }
 
-func handleInConnection(stream chan string, conn net.Conn) {
+func handleInConnection(log logger.Logger, stream chan string, conn net.Conn) {
 	content, err := io.ReadAll(conn)
 	if err != nil {
 		log.Print(err)
@@ -59,15 +58,15 @@ func (ps *PublisherServer) Start() error {
 			case <-ps.quit:
 				return nil
 			default:
-				log.Printf("%v", err)
+				ps.log.Printf("%v", err)
 			}
 		}
 
 		if err := conn.SetKeepAlive(true); err != nil {
-			log.Printf("%v", err)
+			ps.log.Printf("%v", err)
 		}
 
-		go handleInConnection(ps.Stream, conn)
+		go handleInConnection(ps.log, ps.Stream, conn)
 	}
 }
 

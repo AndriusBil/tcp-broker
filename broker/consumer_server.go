@@ -2,7 +2,6 @@ package broker
 
 import (
 	"github.com/andriusbil/tcp-broker/logger"
-	"log"
 	"net"
 )
 
@@ -54,12 +53,12 @@ func (cs *ConsumerServer) Start() error {
 			case <-cs.quit:
 				return err
 			default:
-				log.Printf("%v", err)
+				cs.log.Printf("%v", err)
 			}
 		}
 
 		if err := conn.SetKeepAlive(true); err != nil {
-			log.Printf("%v", err)
+			cs.log.Printf("%v", err)
 		}
 
 		go handleOutConnection(cs.Stream, conn)
