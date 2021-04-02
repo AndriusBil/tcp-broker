@@ -5,10 +5,6 @@ import (
 	"net"
 )
 
-type ConsumerServer struct {
-	Server
-}
-
 func handleOutConnection(log logger.Logger, in chan string, conn net.Conn) {
 	for {
 		msg := <-in

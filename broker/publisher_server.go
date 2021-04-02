@@ -6,15 +6,6 @@ import (
 	"net"
 )
 
-type PublisherServer struct {
-	port     string
-	listener net.Listener
-	quit     chan bool
-	Stream   chan string
-	log      logger.Logger
-	Errors   chan error
-}
-
 func handleInConnection(log logger.Logger, stream chan string, conn net.Conn) {
 	content, err := io.ReadAll(conn)
 	if err != nil {
