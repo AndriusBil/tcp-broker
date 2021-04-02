@@ -28,14 +28,17 @@ func TestBroker(t *testing.T) {
 			consumer := client.New("localhost", cp)
 			consumer2 := client.New("localhost", cp)
 
-			consumer.Subscribe(func(msg string) {
+			err := consumer.Subscribe(func(msg string) {
 				incomingMessages.Write([]byte(msg))
 			})
+
+			assert.Nil(t, err)
 			defer consumer.Stop()
 
-			consumer2.Subscribe(func(msg string) {
+			err = consumer2.Subscribe(func(msg string) {
 				incomingMessages.Write([]byte(msg))
 			})
+			assert.Nil(t, err)
 			defer consumer2.Stop()
 
 			publisher.SendMessage(message)
@@ -71,9 +74,10 @@ func TestBroker(t *testing.T) {
 			publisher.SendMessage(message)
 
 			// Subscribe after push
-			consumer.Subscribe(func(msg string) {
+			err := consumer.Subscribe(func(msg string) {
 				incomingMessages.Write([]byte(msg))
 			})
+			assert.Nil(t, err)
 			defer consumer.Stop()
 
 			assert.Eventually(t, func() bool {
@@ -97,14 +101,16 @@ func TestBroker(t *testing.T) {
 
 			publisher := client.New("localhost", pp)
 			consumer := client.New("localhost", cp)
-			consumer.Subscribe(func(msg string) {
+			err := consumer.Subscribe(func(msg string) {
 				incomingMessages.Write([]byte(msg))
 			})
+			assert.Nil(t, err)
 
 			consumer2 := client.New("localhost", cp)
-			consumer2.Subscribe(func(msg string) {
+			err = consumer2.Subscribe(func(msg string) {
 				incomingMessages.Write([]byte(msg))
 			})
+			assert.Nil(t, err)
 			defer consumer2.Stop()
 
 			publisher.SendMessage(message)
