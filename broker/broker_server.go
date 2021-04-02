@@ -6,8 +6,8 @@ type BrokerServer struct {
 	publishersPort string
 	consumersPort  string
 
-	consumerServer  *ConsumerServer
-	publisherServer *PublisherServer
+	consumerServer  *Server
+	publisherServer *Server
 
 	log  logger.Logger
 	quit chan bool
