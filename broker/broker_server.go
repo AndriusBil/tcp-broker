@@ -31,7 +31,6 @@ func (bs *BrokerServer) Start() {
 			bs.consumerServer.Stream <- msg
 		case <-bs.quit:
 		default:
-			continue
 		}
 	}
 }

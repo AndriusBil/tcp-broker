@@ -14,12 +14,24 @@ type PublisherServer struct {
 }
 
 func NewPublisherServer(port string) *PublisherServer {
-	server := PublisherServer{
-		port: port,
+	return &PublisherServer{
+		port:   port,
+		quit:   make(chan bool, 1),
+		Stream: make(chan string),
 	}
-	server.quit = make(chan bool, 1)
-	server.Stream = make(chan string)
-	return &server
+}
+
+func handleInConnection(stream chan string, conn net.Conn) {
+	content, err := io.ReadAll(conn)
+	if err != nil {
+		log.Print(err)
+	}
+
+	stream <- string(content)
+
+	if err := conn.Close(); err != nil {
+		log.Print(err)
+	}
 }
 
 func (ps *PublisherServer) Start() error {
@@ -45,7 +57,6 @@ func (ps *PublisherServer) Start() error {
 				return nil
 			default:
 				log.Printf("%v", err)
-				continue
 			}
 		}
 
@@ -53,18 +64,7 @@ func (ps *PublisherServer) Start() error {
 			log.Printf("%v", err)
 		}
 
-		go func(c net.Conn) {
-			content, err := io.ReadAll(c)
-			if err != nil {
-				log.Print(err)
-			}
-
-			ps.Stream <- string(content)
-
-			if err := c.Close(); err != nil {
-				log.Print(err)
-			}
-		}(conn)
+		go handleInConnection(ps.Stream, conn)
 	}
 }
 

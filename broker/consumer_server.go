@@ -13,21 +13,18 @@ type ConsumerServer struct {
 }
 
 func NewConsumerServer(port string) *ConsumerServer {
-	server := ConsumerServer{
-		port: port,
+	return &ConsumerServer{
+		port:   port,
+		Stream: make(chan string),
+		quit:   make(chan bool, 1),
 	}
-	server.Stream = make(chan string)
-	server.quit = make(chan bool, 1)
-	return &server
 }
 
-func handleConnection(in chan string, conn net.Conn) {
+func handleOutConnection(in chan string, conn net.Conn) {
 	for {
-		select {
-		case msg := <-in:
-			if _, err := conn.Write([]byte(msg + string('\n'))); err != nil {
-				conn.Close()
-			}
+		msg := <-in
+		if _, err := conn.Write([]byte(msg + string('\n'))); err != nil {
+			conn.Close()
 		}
 	}
 }
@@ -62,7 +59,7 @@ func (cs *ConsumerServer) Start() error {
 			log.Printf("%v", err)
 		}
 
-		go handleConnection(cs.Stream, conn)
+		go handleOutConnection(cs.Stream, conn)
 	}
 }
 
