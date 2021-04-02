@@ -12,6 +12,5 @@ func main() {
 		os.Getenv("CONSUMERS_PORT"),
 		log.Default(),
 	)
-	defer server.Stop()
 	server.Start()
 }
