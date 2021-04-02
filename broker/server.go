@@ -15,6 +15,7 @@ type Server struct {
 	Errors      chan error
 	connHandler func(logger.Logger, chan string, net.Conn)
 	mu          sync.Mutex
+	Started     chan bool
 }
 
 func NewServer(
@@ -29,6 +30,7 @@ func NewServer(
 		log:         log,
 		Errors:      make(chan error),
 		connHandler: connHandler,
+		Started:     make(chan bool),
 	}
 }
 
@@ -48,6 +50,8 @@ func (s *Server) Start() {
 	s.mu.Lock()
 	s.listener = l
 	s.mu.Unlock()
+
+	s.Started <- true
 
 	defer l.Close()
 

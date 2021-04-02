@@ -9,8 +9,9 @@ type BrokerServer struct {
 	consumerServer  *Server
 	publisherServer *Server
 
-	log  logger.Logger
-	quit chan bool
+	log     logger.Logger
+	quit    chan bool
+	Started chan bool
 }
 
 func NewBrokerServer(publishersPort string, consumersPort string, log logger.Logger) *BrokerServer {
@@ -21,12 +22,19 @@ func NewBrokerServer(publishersPort string, consumersPort string, log logger.Log
 		publisherServer: NewPublisherServer(publishersPort, log),
 		quit:            make(chan bool, 1),
 		log:             log,
+		Started:         make(chan bool),
 	}
 }
 
 func (bs *BrokerServer) Start() {
 	go bs.consumerServer.Start()
 	go bs.publisherServer.Start()
+
+	go func() {
+		<-bs.consumerServer.Started
+		<-bs.publisherServer.Started
+		bs.Started <- true
+	}()
 
 	for {
 		select {
