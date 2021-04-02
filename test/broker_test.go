@@ -6,6 +6,7 @@ import (
 	"github.com/andriusbil/tcp-broker/logger"
 	"github.com/stretchr/testify/assert"
 	"log"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -182,6 +183,24 @@ func TestBroker(t *testing.T) {
 				}
 
 				return false
+			}, time.Second, 10*time.Millisecond)
+		})
+
+		t.Run("it should log an error if port is invalid", func(t *testing.T) {
+			sw := logger.SliceWriter{}
+			l := log.New(&sw, "", log.Ldate)
+
+			pp, cp := ":999999999", ":999999999"
+			server := broker.NewBrokerServer(pp, cp, l)
+			go server.Start()
+			defer func() {
+				go server.Stop()
+			}()
+
+			assert.Eventually(t, func() bool {
+				msg := time.Now().Format("2006/01/02") + " address " + strings.Trim(pp, ":") + ": invalid port"
+
+				return assert.Contains(t, sw.Slice, msg)
 			}, time.Second, 10*time.Millisecond)
 		})
 	})

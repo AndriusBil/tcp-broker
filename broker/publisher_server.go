@@ -60,7 +60,7 @@ func (ps *PublisherServer) Start() {
 		if err != nil {
 			select {
 			case <-ps.quit:
-				ps.Errors <- err
+				ps.log.Printf("%v", err)
 				return
 			default:
 				ps.log.Printf("%v", err)

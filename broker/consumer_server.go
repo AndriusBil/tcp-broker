@@ -55,7 +55,7 @@ func (cs *ConsumerServer) Start() {
 		if err != nil {
 			select {
 			case <-cs.quit:
-				cs.Errors <- err
+				cs.log.Printf("%v", err)
 				return
 			default:
 				cs.log.Printf("%v", err)
