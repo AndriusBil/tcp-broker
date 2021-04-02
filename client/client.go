@@ -74,5 +74,7 @@ func (c *Client) Subscribe(fn func(string)) error {
 }
 
 func (c *Client) Stop() {
-	c.conn.Close()
+	if c.conn != nil {
+		c.conn.Close()
+	}
 }
