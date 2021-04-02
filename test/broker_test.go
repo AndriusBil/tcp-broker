@@ -18,7 +18,7 @@ func TestBroker(t *testing.T) {
 
 			incomingMessages := logger.SliceWriter{}
 
-			pp, cp := ":3000", ":3001"
+			pp, cp := ":3333", ":3334"
 			server := broker.NewBrokerServer(pp, cp, log.Default())
 			go server.Start()
 			defer server.Stop()
@@ -60,7 +60,7 @@ func TestBroker(t *testing.T) {
 
 			incomingMessages := logger.SliceWriter{}
 
-			pp, cp := ":3000", ":3001"
+			pp, cp := ":3335", ":3336"
 			server := broker.NewBrokerServer(pp, cp, log.Default())
 			go server.Start()
 			defer server.Stop()
@@ -94,7 +94,7 @@ func TestBroker(t *testing.T) {
 
 			incomingMessages := logger.SliceWriter{}
 
-			pp, cp := ":3000", ":3001"
+			pp, cp := ":3337", ":3338"
 			server := broker.NewBrokerServer(pp, cp, log.Default())
 			go server.Start()
 			defer server.Stop()
@@ -135,7 +135,7 @@ func TestBroker(t *testing.T) {
 			sw := logger.SliceWriter{}
 			l := log.New(&sw, "", log.Ldate)
 
-			pp, cp := ":3000", ":3001"
+			pp, cp := ":3339", ":3340"
 			server := broker.NewBrokerServer(pp, cp, l)
 			go server.Start()
 			defer func() {
@@ -156,7 +156,7 @@ func TestBroker(t *testing.T) {
 			sw := logger.SliceWriter{}
 			l := log.New(&sw, "", log.Ldate)
 
-			pp, cp := ":3000", ":3001"
+			pp, cp := ":3341", ":3342"
 			server := broker.NewBrokerServer(pp, cp, l)
 			go server.Start()
 			defer func() {
@@ -177,7 +177,7 @@ func TestBroker(t *testing.T) {
 			sw := logger.SliceWriter{}
 			l := log.New(&sw, "", log.Ldate)
 
-			pp, cp := ":999999999", ":3001"
+			pp, cp := ":999999999", ":3343"
 			server := broker.NewBrokerServer(pp, cp, l)
 			go server.Start()
 
@@ -192,7 +192,7 @@ func TestBroker(t *testing.T) {
 			sw := logger.SliceWriter{}
 			l := log.New(&sw, "", log.Ldate)
 
-			pp, cp := ":3001", ":99999999"
+			pp, cp := ":3344", ":99999999"
 			server := broker.NewBrokerServer(pp, cp, l)
 			go server.Start()
 
