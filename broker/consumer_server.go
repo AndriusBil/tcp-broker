@@ -6,8 +6,7 @@ import (
 )
 
 func handleOutConnection(log logger.Logger, in chan string, conn net.Conn) {
-	for {
-		msg := <-in
+	for msg := range in {
 		if _, err := conn.Write([]byte(msg + string('\n'))); err != nil {
 			conn.Close()
 			log.Printf("%v", err)
