@@ -3,6 +3,7 @@ package broker
 import (
 	"github.com/andriusbil/tcp-broker/logger"
 	"net"
+	"sync"
 )
 
 type Server struct {
@@ -13,6 +14,7 @@ type Server struct {
 	log         logger.Logger
 	Errors      chan error
 	connHandler func(logger.Logger, chan string, net.Conn)
+	mu          sync.Mutex
 }
 
 func NewServer(
@@ -43,7 +45,9 @@ func (s *Server) Start() {
 		return
 	}
 
+	s.mu.Lock()
 	s.listener = l
+	s.mu.Unlock()
 
 	defer l.Close()
 
@@ -66,9 +70,15 @@ func (s *Server) Start() {
 	}
 }
 
+func (s *Server) GetListener() net.Listener {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.listener
+}
+
 func (s *Server) Stop() {
 	s.quit <- true
-	if s.listener != nil {
-		s.listener.Close()
+	if l := s.GetListener(); l != nil {
+		l.Close()
 	}
 }

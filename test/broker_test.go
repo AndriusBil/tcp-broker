@@ -44,11 +44,11 @@ func TestBroker(t *testing.T) {
 			publisher2.SendMessage(message)
 
 			assert.Eventually(t, func() bool {
-				return assert.Contains(t, incomingMessages.Value, message)
+				return assert.Contains(t, incomingMessages.Get(), message)
 			}, time.Second, 10*time.Millisecond)
 
 			assert.Eventually(t, func() bool {
-				return assert.Len(t, incomingMessages.Value, 4)
+				return assert.Len(t, incomingMessages.Get(), 4)
 			}, time.Second, 10*time.Millisecond)
 		})
 
@@ -77,11 +77,11 @@ func TestBroker(t *testing.T) {
 			defer consumer.Stop()
 
 			assert.Eventually(t, func() bool {
-				return assert.Contains(t, incomingMessages.Value, message)
+				return assert.Contains(t, incomingMessages.Get(), message)
 			}, time.Second, 10*time.Millisecond)
 
 			assert.Eventually(t, func() bool {
-				return assert.Len(t, incomingMessages.Value, 4)
+				return assert.Len(t, incomingMessages.Get(), 4)
 			}, time.Second, 10*time.Millisecond)
 		})
 
@@ -117,11 +117,11 @@ func TestBroker(t *testing.T) {
 			publisher.SendMessage(message)
 
 			assert.Eventually(t, func() bool {
-				return assert.Contains(t, incomingMessages.Value, message)
+				return assert.Contains(t, incomingMessages.Get(), message)
 			}, time.Second, 10*time.Millisecond)
 
 			assert.Eventually(t, func() bool {
-				return assert.Len(t, incomingMessages.Value, 3)
+				return assert.Len(t, incomingMessages.Get(), 3)
 			}, time.Second, 10*time.Millisecond)
 		})
 
@@ -142,7 +142,7 @@ func TestBroker(t *testing.T) {
 			assert.Eventually(t, func() bool {
 				msg := time.Now().Format("2006/01/02") + " listen tcp " + pp + ": bind: address already in use"
 
-				return assert.Contains(t, sw.Value, msg)
+				return assert.Contains(t, sw.Get(), msg)
 			}, time.Second, 10*time.Millisecond)
 		})
 
@@ -163,7 +163,7 @@ func TestBroker(t *testing.T) {
 			assert.Eventually(t, func() bool {
 				msg := time.Now().Format("2006/01/02") + " listen tcp " + cp + ": bind: address already in use"
 
-				return assert.Contains(t, sw.Value, msg)
+				return assert.Contains(t, sw.Get(), msg)
 			}, time.Second, 10*time.Millisecond)
 		})
 
@@ -178,7 +178,7 @@ func TestBroker(t *testing.T) {
 			assert.Eventually(t, func() bool {
 				msg := time.Now().Format("2006/01/02") + " address " + strings.Trim(pp, ":") + ": invalid port"
 
-				return assert.Contains(t, sw.Value, msg)
+				return assert.Contains(t, sw.Get(), msg)
 			}, time.Second, 10*time.Millisecond)
 		})
 
@@ -193,7 +193,7 @@ func TestBroker(t *testing.T) {
 			assert.Eventually(t, func() bool {
 				msg := time.Now().Format("2006/01/02") + " address " + strings.Trim(cp, ":") + ": invalid port"
 
-				return assert.Contains(t, sw.Value, msg)
+				return assert.Contains(t, sw.Get(), msg)
 			}, time.Second, 10*time.Millisecond)
 		})
 	})
