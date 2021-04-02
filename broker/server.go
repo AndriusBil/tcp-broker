@@ -12,7 +12,6 @@ type Server struct {
 	quit        chan bool
 	log         logger.Logger
 	Errors      chan error
-	Started     chan bool
 	connHandler func(logger.Logger, chan string, net.Conn)
 }
 
@@ -53,7 +52,6 @@ func (s *Server) Start() {
 		if err != nil {
 			select {
 			case <-s.quit:
-				s.log.Printf("%v", err)
 				return
 			default:
 				s.log.Printf("%v", err)
@@ -68,10 +66,9 @@ func (s *Server) Start() {
 	}
 }
 
-func (s *Server) Stop() error {
+func (s *Server) Stop() {
 	s.quit <- true
 	if s.listener != nil {
 		s.listener.Close()
 	}
-	return nil
 }

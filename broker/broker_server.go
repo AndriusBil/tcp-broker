@@ -33,9 +33,11 @@ func (bs *BrokerServer) Start() {
 		case err := <-bs.publisherServer.Errors:
 			bs.log.Printf("%v", err)
 			bs.Stop()
+			return
 		case err := <-bs.consumerServer.Errors:
 			bs.log.Printf("%v", err)
 			bs.Stop()
+			return
 		case msg := <-bs.publisherServer.Stream:
 			bs.consumerServer.Stream <- msg
 		case <-bs.quit:
