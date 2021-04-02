@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"log"
 	"strings"
-	"sync"
 	"testing"
 	"time"
 )
@@ -17,12 +16,7 @@ func TestBroker(t *testing.T) {
 		t.Run("it should notify consumers with new messages from publishers", func(t *testing.T) {
 			message := "Test123"
 
-			type Messages struct {
-				mu    sync.Mutex
-				Value []string
-			}
-
-			incomingMessages := Messages{}
+			incomingMessages := logger.SliceWriter{}
 
 			pp, cp := ":3000", ":3001"
 			server := broker.NewBrokerServer(pp, cp, log.Default())
@@ -35,16 +29,12 @@ func TestBroker(t *testing.T) {
 			consumer2 := client.New("localhost", cp)
 
 			consumer.Subscribe(func(msg string) {
-				incomingMessages.mu.Lock()
-				incomingMessages.Value = append(incomingMessages.Value, "node1:"+msg)
-				incomingMessages.mu.Unlock()
+				incomingMessages.Write([]byte(msg))
 			})
 			defer consumer.Stop()
 
 			consumer2.Subscribe(func(msg string) {
-				incomingMessages.mu.Lock()
-				incomingMessages.Value = append(incomingMessages.Value, "node2:"+msg)
-				incomingMessages.mu.Unlock()
+				incomingMessages.Write([]byte(msg))
 			})
 			defer consumer2.Stop()
 
@@ -54,23 +44,18 @@ func TestBroker(t *testing.T) {
 			publisher2.SendMessage(message)
 
 			assert.Eventually(t, func() bool {
-				return assert.Contains(t, incomingMessages.Value, "node1:"+message)
+				return assert.Contains(t, incomingMessages.Value, message)
 			}, time.Second, 10*time.Millisecond)
 
 			assert.Eventually(t, func() bool {
-				return assert.Contains(t, incomingMessages.Value, "node2:"+message)
+				return assert.Len(t, incomingMessages.Value, 4)
 			}, time.Second, 10*time.Millisecond)
 		})
 
 		t.Run("it should notify new consumers with previously published messages", func(t *testing.T) {
 			message := "Test123"
 
-			type Messages struct {
-				mu    sync.Mutex
-				Value []string
-			}
-
-			incomingMessages := Messages{}
+			incomingMessages := logger.SliceWriter{}
 
 			pp, cp := ":3000", ":3001"
 			server := broker.NewBrokerServer(pp, cp, log.Default())
@@ -87,14 +72,12 @@ func TestBroker(t *testing.T) {
 
 			// Subscribe after push
 			consumer.Subscribe(func(msg string) {
-				incomingMessages.mu.Lock()
-				incomingMessages.Value = append(incomingMessages.Value, "node1:"+msg)
-				incomingMessages.mu.Unlock()
+				incomingMessages.Write([]byte(msg))
 			})
 			defer consumer.Stop()
 
 			assert.Eventually(t, func() bool {
-				return assert.Contains(t, incomingMessages.Value, "node1:"+message)
+				return assert.Contains(t, incomingMessages.Value, message)
 			}, time.Second, 10*time.Millisecond)
 
 			assert.Eventually(t, func() bool {
@@ -105,12 +88,7 @@ func TestBroker(t *testing.T) {
 		t.Run("it should continue serving consumers if some of them stop", func(t *testing.T) {
 			message := "Test123"
 
-			type Messages struct {
-				mu    sync.Mutex
-				Value []string
-			}
-
-			incomingMessages := Messages{}
+			incomingMessages := logger.SliceWriter{}
 
 			pp, cp := ":3000", ":3001"
 			server := broker.NewBrokerServer(pp, cp, log.Default())
@@ -120,16 +98,12 @@ func TestBroker(t *testing.T) {
 			publisher := client.New("localhost", pp)
 			consumer := client.New("localhost", cp)
 			consumer.Subscribe(func(msg string) {
-				incomingMessages.mu.Lock()
-				incomingMessages.Value = append(incomingMessages.Value, "node1:"+msg)
-				incomingMessages.mu.Unlock()
+				incomingMessages.Write([]byte(msg))
 			})
 
 			consumer2 := client.New("localhost", cp)
 			consumer2.Subscribe(func(msg string) {
-				incomingMessages.mu.Lock()
-				incomingMessages.Value = append(incomingMessages.Value, "node2:"+msg)
-				incomingMessages.mu.Unlock()
+				incomingMessages.Write([]byte(msg))
 			})
 			defer consumer2.Stop()
 
@@ -143,15 +117,11 @@ func TestBroker(t *testing.T) {
 			publisher.SendMessage(message)
 
 			assert.Eventually(t, func() bool {
-				return assert.Contains(t, incomingMessages.Value, "node1:"+message)
+				return assert.Contains(t, incomingMessages.Value, message)
 			}, time.Second, 10*time.Millisecond)
 
 			assert.Eventually(t, func() bool {
-				return assert.Contains(t, incomingMessages.Value, "node2:"+message)
-			}, time.Second, 10*time.Millisecond)
-
-			assert.Eventually(t, func() bool {
-				return len(incomingMessages.Value) >= 3
+				return assert.Len(t, incomingMessages.Value, 3)
 			}, time.Second, 10*time.Millisecond)
 		})
 
@@ -172,7 +142,7 @@ func TestBroker(t *testing.T) {
 			assert.Eventually(t, func() bool {
 				msg := time.Now().Format("2006/01/02") + " listen tcp " + pp + ": bind: address already in use"
 
-				return assert.Contains(t, sw.Slice, msg)
+				return assert.Contains(t, sw.Value, msg)
 			}, time.Second, 10*time.Millisecond)
 		})
 
@@ -193,7 +163,7 @@ func TestBroker(t *testing.T) {
 			assert.Eventually(t, func() bool {
 				msg := time.Now().Format("2006/01/02") + " listen tcp " + cp + ": bind: address already in use"
 
-				return assert.Contains(t, sw.Slice, msg)
+				return assert.Contains(t, sw.Value, msg)
 			}, time.Second, 10*time.Millisecond)
 		})
 
@@ -208,7 +178,7 @@ func TestBroker(t *testing.T) {
 			assert.Eventually(t, func() bool {
 				msg := time.Now().Format("2006/01/02") + " address " + strings.Trim(pp, ":") + ": invalid port"
 
-				return assert.Contains(t, sw.Slice, msg)
+				return assert.Contains(t, sw.Value, msg)
 			}, time.Second, 10*time.Millisecond)
 		})
 
@@ -223,7 +193,7 @@ func TestBroker(t *testing.T) {
 			assert.Eventually(t, func() bool {
 				msg := time.Now().Format("2006/01/02") + " address " + strings.Trim(cp, ":") + ": invalid port"
 
-				return assert.Contains(t, sw.Slice, msg)
+				return assert.Contains(t, sw.Value, msg)
 			}, time.Second, 10*time.Millisecond)
 		})
 	})
