@@ -2,6 +2,7 @@ package client
 
 import (
 	"bufio"
+	"log"
 	"net"
 	"strings"
 )
@@ -46,6 +47,7 @@ func listenMessages(conn net.Conn, fn func(string)) {
 		msg, err := reader.ReadString('\n')
 
 		if err != nil {
+			log.Printf("%v", err)
 			return
 		}
 
@@ -56,11 +58,13 @@ func listenMessages(conn net.Conn, fn func(string)) {
 func (c *Client) Subscribe(fn func(string)) error {
 	tcpAddr, err := net.ResolveTCPAddr("tcp", c.url+c.port)
 	if err != nil {
+		log.Printf("%v", err)
 		return err
 	}
 
 	conn, err := net.DialTCP("tcp", nil, tcpAddr)
 	if err != nil {
+		log.Printf("%v", err)
 		return err
 	}
 
