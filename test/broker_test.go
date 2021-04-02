@@ -3,6 +3,7 @@ package test
 import (
 	"github.com/andriusbil/tcp-broker/broker"
 	"github.com/andriusbil/tcp-broker/client"
+	"github.com/andriusbil/tcp-broker/logger"
 	"github.com/stretchr/testify/assert"
 	"log"
 	"sync"
@@ -150,6 +151,37 @@ func TestBroker(t *testing.T) {
 
 			assert.Eventually(t, func() bool {
 				return len(incomingMessages.Value) >= 3
+			}, time.Second, 10*time.Millisecond)
+		})
+
+		t.Run("it should log an error if port is in use", func(t *testing.T) {
+			sw := logger.SliceWriter{}
+			l := log.New(&sw, "", log.Ldate)
+
+			pp, cp := ":3000", ":3001"
+			server := broker.NewBrokerServer(pp, cp, l)
+			go server.Start()
+			defer func() {
+				go server.Stop()
+			}()
+
+			server2 := broker.NewBrokerServer(pp, cp, l)
+			go server2.Start()
+			defer func() {
+				go server2.Stop()
+			}()
+
+			assert.Eventually(t, func() bool {
+				msg := time.Now().Format("2006/01/02") + " listen tcp " + pp + ": bind: address already in use"
+				msg2 := time.Now().Format("2006/01/02") + " listen tcp " + cp + ": bind: address already in use"
+
+				for _, s := range sw.Slice {
+					if s == msg || s == msg2 {
+						return true
+					}
+				}
+
+				return false
 			}, time.Second, 10*time.Millisecond)
 		})
 	})

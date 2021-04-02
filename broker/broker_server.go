@@ -9,6 +9,7 @@ type BrokerServer struct {
 	consumerServer  *ConsumerServer
 	publisherServer *PublisherServer
 
+	log  logger.Logger
 	quit chan bool
 }
 
@@ -19,19 +20,26 @@ func NewBrokerServer(publishersPort string, consumersPort string, log logger.Log
 		consumerServer:  NewConsumerServer(consumersPort, log),
 		publisherServer: NewPublisherServer(publishersPort, log),
 		quit:            make(chan bool, 1),
+		log:             log,
 	}
 }
 
 func (bs *BrokerServer) Start() {
-
 	go bs.consumerServer.Start()
 	go bs.publisherServer.Start()
 
 	for {
 		select {
+		case err := <-bs.publisherServer.Errors:
+			bs.log.Printf("%v", err)
+			bs.Stop()
+		case err := <-bs.consumerServer.Errors:
+			bs.log.Printf("%v", err)
+			bs.Stop()
 		case msg := <-bs.publisherServer.Stream:
 			bs.consumerServer.Stream <- msg
 		case <-bs.quit:
+			return
 		default:
 		}
 	}

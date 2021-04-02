@@ -12,6 +12,7 @@ type PublisherServer struct {
 	quit     chan bool
 	Stream   chan string
 	log      logger.Logger
+	Errors   chan error
 }
 
 func NewPublisherServer(port string, log logger.Logger) *PublisherServer {
@@ -20,6 +21,7 @@ func NewPublisherServer(port string, log logger.Logger) *PublisherServer {
 		quit:   make(chan bool, 1),
 		Stream: make(chan string),
 		log:    log,
+		Errors: make(chan error),
 	}
 }
 
@@ -36,15 +38,17 @@ func handleInConnection(log logger.Logger, stream chan string, conn net.Conn) {
 	}
 }
 
-func (ps *PublisherServer) Start() error {
+func (ps *PublisherServer) Start() {
 	tcpAddr, err := net.ResolveTCPAddr("tcp", ps.port)
 	if err != nil {
-		return err
+		ps.Errors <- err
+		return
 	}
 
 	l, err := net.ListenTCP("tcp", tcpAddr)
 	if err != nil {
-		return err
+		ps.Errors <- err
+		return
 	}
 
 	ps.listener = l
@@ -56,7 +60,8 @@ func (ps *PublisherServer) Start() error {
 		if err != nil {
 			select {
 			case <-ps.quit:
-				return nil
+				ps.Errors <- err
+				return
 			default:
 				ps.log.Printf("%v", err)
 			}
@@ -72,6 +77,8 @@ func (ps *PublisherServer) Start() error {
 
 func (ps *PublisherServer) Stop() error {
 	ps.quit <- true
-	ps.listener.Close()
+	if ps.listener != nil {
+		ps.listener.Close()
+	}
 	return nil
 }

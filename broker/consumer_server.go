@@ -11,6 +11,7 @@ type ConsumerServer struct {
 	Stream   chan string
 	quit     chan bool
 	log      logger.Logger
+	Errors   chan error
 }
 
 func NewConsumerServer(port string, log logger.Logger) *ConsumerServer {
@@ -19,6 +20,7 @@ func NewConsumerServer(port string, log logger.Logger) *ConsumerServer {
 		Stream: make(chan string),
 		quit:   make(chan bool, 1),
 		log:    log,
+		Errors: make(chan error),
 	}
 }
 
@@ -31,15 +33,17 @@ func handleOutConnection(in chan string, conn net.Conn) {
 	}
 }
 
-func (cs *ConsumerServer) Start() error {
+func (cs *ConsumerServer) Start() {
 	tcpAddr, err := net.ResolveTCPAddr("tcp", cs.port)
 	if err != nil {
-		return err
+		cs.Errors <- err
+		return
 	}
 
 	l, err := net.ListenTCP("tcp", tcpAddr)
 	if err != nil {
-		return err
+		cs.Errors <- err
+		return
 	}
 
 	cs.listener = l
@@ -51,7 +55,8 @@ func (cs *ConsumerServer) Start() error {
 		if err != nil {
 			select {
 			case <-cs.quit:
-				return err
+				cs.Errors <- err
+				return
 			default:
 				cs.log.Printf("%v", err)
 			}
@@ -67,6 +72,8 @@ func (cs *ConsumerServer) Start() error {
 
 func (cs *ConsumerServer) Stop() error {
 	cs.quit <- true
-	cs.listener.Close()
+	if cs.listener != nil {
+		cs.listener.Close()
+	}
 	return nil
 }
