@@ -22,13 +22,12 @@ func TestBroker(t *testing.T) {
 			server := broker.NewBrokerServer(pp, cp, log.Default())
 			go server.Start()
 			defer server.Stop()
+			<-server.Started
 
 			publisher := client.New("localhost", pp)
 			publisher2 := client.New("localhost", pp)
 			consumer := client.New("localhost", cp)
 			consumer2 := client.New("localhost", cp)
-
-			<-server.Started
 
 			err := consumer.Subscribe(func(msg string) {
 				incomingMessages.Write([]byte(msg))
@@ -66,6 +65,7 @@ func TestBroker(t *testing.T) {
 			server := broker.NewBrokerServer(pp, cp, log.Default())
 			go server.Start()
 			defer server.Stop()
+			<-server.Started
 
 			publisher := client.New("localhost", pp)
 			consumer := client.New("localhost", cp)
@@ -74,8 +74,6 @@ func TestBroker(t *testing.T) {
 			publisher.SendMessage(message)
 			publisher.SendMessage(message)
 			publisher.SendMessage(message)
-
-			<-server.Started
 
 			// Subscribe after push
 			err := consumer.Subscribe(func(msg string) {
@@ -102,11 +100,10 @@ func TestBroker(t *testing.T) {
 			server := broker.NewBrokerServer(pp, cp, log.Default())
 			go server.Start()
 			defer server.Stop()
+			<-server.Started
 
 			publisher := client.New("localhost", pp)
 			consumer := client.New("localhost", cp)
-
-			<-server.Started
 
 			err := consumer.Subscribe(func(msg string) {
 				incomingMessages.Write([]byte(msg))
