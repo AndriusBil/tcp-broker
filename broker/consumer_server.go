@@ -1,6 +1,7 @@
 package broker
 
 import (
+	"github.com/andriusbil/tcp-broker/logger"
 	"log"
 	"net"
 )
@@ -10,13 +11,15 @@ type ConsumerServer struct {
 	listener net.Listener
 	Stream   chan string
 	quit     chan bool
+	log      logger.Logger
 }
 
-func NewConsumerServer(port string) *ConsumerServer {
+func NewConsumerServer(port string, log logger.Logger) *ConsumerServer {
 	return &ConsumerServer{
 		port:   port,
 		Stream: make(chan string),
 		quit:   make(chan bool, 1),
+		log:    log,
 	}
 }
 

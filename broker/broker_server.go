@@ -1,5 +1,7 @@
 package broker
 
+import "github.com/andriusbil/tcp-broker/logger"
+
 type BrokerServer struct {
 	publishersPort string
 	consumersPort  string
@@ -10,17 +12,17 @@ type BrokerServer struct {
 	quit chan bool
 }
 
-func NewBrokerServer(publishersPort string, consumersPort string) *BrokerServer {
+func NewBrokerServer(publishersPort string, consumersPort string, log logger.Logger) *BrokerServer {
 	return &BrokerServer{
-		publishersPort: publishersPort,
-		consumersPort:  consumersPort,
-		quit:           make(chan bool, 1),
+		publishersPort:  publishersPort,
+		consumersPort:   consumersPort,
+		consumerServer:  NewConsumerServer(consumersPort, log),
+		publisherServer: NewPublisherServer(publishersPort, log),
+		quit:            make(chan bool, 1),
 	}
 }
 
 func (bs *BrokerServer) Start() {
-	bs.consumerServer = NewConsumerServer(bs.consumersPort)
-	bs.publisherServer = NewPublisherServer(bs.publishersPort)
 
 	go bs.consumerServer.Start()
 	go bs.publisherServer.Start()

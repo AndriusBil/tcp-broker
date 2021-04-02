@@ -4,6 +4,7 @@ import (
 	"github.com/andriusbil/tcp-broker/broker"
 	"github.com/andriusbil/tcp-broker/client"
 	"github.com/stretchr/testify/assert"
+	"log"
 	"sync"
 	"testing"
 	"time"
@@ -22,7 +23,7 @@ func TestBroker(t *testing.T) {
 			incomingMessages := Messages{}
 
 			pp, cp := ":3000", ":3001"
-			server := broker.NewBrokerServer(pp, cp)
+			server := broker.NewBrokerServer(pp, cp, log.Default())
 			go server.Start()
 			defer server.Stop()
 
@@ -70,7 +71,7 @@ func TestBroker(t *testing.T) {
 			incomingMessages := Messages{}
 
 			pp, cp := ":3000", ":3001"
-			server := broker.NewBrokerServer(pp, cp)
+			server := broker.NewBrokerServer(pp, cp, log.Default())
 			go server.Start()
 			defer server.Stop()
 
@@ -110,7 +111,7 @@ func TestBroker(t *testing.T) {
 			incomingMessages := Messages{}
 
 			pp, cp := ":3000", ":3001"
-			server := broker.NewBrokerServer(pp, cp)
+			server := broker.NewBrokerServer(pp, cp, log.Default())
 			go server.Start()
 			defer server.Stop()
 

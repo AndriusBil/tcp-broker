@@ -1,6 +1,7 @@
 package broker
 
 import (
+	"github.com/andriusbil/tcp-broker/logger"
 	"io"
 	"log"
 	"net"
@@ -11,13 +12,15 @@ type PublisherServer struct {
 	listener net.Listener
 	quit     chan bool
 	Stream   chan string
+	log      logger.Logger
 }
 
-func NewPublisherServer(port string) *PublisherServer {
+func NewPublisherServer(port string, log logger.Logger) *PublisherServer {
 	return &PublisherServer{
 		port:   port,
 		quit:   make(chan bool, 1),
 		Stream: make(chan string),
+		log:    log,
 	}
 }
 
