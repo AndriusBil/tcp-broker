@@ -145,6 +145,7 @@ func TestBroker(t *testing.T) {
 			defer func() {
 				go server.Stop()
 			}()
+			<-server.Started
 
 			server2 := broker.NewBrokerServer(pp, ":3002", l)
 			go server2.Start()
@@ -166,6 +167,7 @@ func TestBroker(t *testing.T) {
 			defer func() {
 				go server.Stop()
 			}()
+			<-server.Started
 
 			server2 := broker.NewBrokerServer(":3002", cp, l)
 			go server2.Start()
