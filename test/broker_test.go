@@ -147,7 +147,7 @@ func TestBroker(t *testing.T) {
 			}()
 			<-server.Started
 
-			server2 := broker.NewBrokerServer(pp, ":3002", l)
+			server2 := broker.NewBrokerServer(pp, ":3341", l)
 			go server2.Start()
 
 			assert.Eventually(t, func() bool {
@@ -161,7 +161,7 @@ func TestBroker(t *testing.T) {
 			sw := logger.SliceWriter{}
 			l := log.New(&sw, "", log.Ldate)
 
-			pp, cp := ":3341", ":3342"
+			pp, cp := ":3342", ":3343"
 			server := broker.NewBrokerServer(pp, cp, l)
 			go server.Start()
 			defer func() {
@@ -169,7 +169,7 @@ func TestBroker(t *testing.T) {
 			}()
 			<-server.Started
 
-			server2 := broker.NewBrokerServer(":3002", cp, l)
+			server2 := broker.NewBrokerServer(":3344", cp, l)
 			go server2.Start()
 
 			assert.Eventually(t, func() bool {
@@ -183,7 +183,7 @@ func TestBroker(t *testing.T) {
 			sw := logger.SliceWriter{}
 			l := log.New(&sw, "", log.Ldate)
 
-			pp, cp := ":999999999", ":3343"
+			pp, cp := ":999999999", ":3345"
 			server := broker.NewBrokerServer(pp, cp, l)
 			go server.Start()
 
@@ -198,7 +198,7 @@ func TestBroker(t *testing.T) {
 			sw := logger.SliceWriter{}
 			l := log.New(&sw, "", log.Ldate)
 
-			pp, cp := ":3344", ":99999999"
+			pp, cp := ":3346", ":99999999"
 			server := broker.NewBrokerServer(pp, cp, l)
 			go server.Start()
 
