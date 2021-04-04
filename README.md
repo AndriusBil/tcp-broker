@@ -1,7 +1,7 @@
 # tcp-broker
 
 ## Built with
-Project built with go1.16, using native go libraries.
+Project built with go1.16, using standard go libraries.
 
 ## Getting started
 
